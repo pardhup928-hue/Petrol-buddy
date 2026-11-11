@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Customer Registration{% endblock %}
+
+{% block public_content %}
+<div style="min-height: calc(100vh - 200px); padding:3rem 1.5rem; background-color:var(--bg-body); display:flex; justify-content:center; align-items:center;">
+    <div style="width:100%; max-width:680px;">
+        <div class="card" style="box-shadow:var(--shadow-lg); border-top: 5px solid var(--primary); padding:2.25rem;">
+            
+            <div style="text-align:center; margin-bottom:2rem;">
+                <div style="width:54px; height:54px; background:var(--primary-light); color:var(--primary); border-radius:14px; display:inline-flex; align-items:center; justify-content:center; margin-bottom:0.75rem;">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <h2 style="color:var(--navy-dark); font-size:1.75rem; font-weight:800;">Create Customer Account</h2>
+                <p style="color:var(--text-muted); font-size:0.9rem;">Register to order doorstep petrol and diesel delivery</p>
+            </div>
+
+            {% if errors %}
+                <div class="alert alert-danger" style="display:block;">
+                    <strong>Please correct the following:</strong>
+                    <ul style="margin-left:20px; margin-top:8px;">
+                        {% for err in errors %}
+                            <li>{{ err }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form action="{{ url_for('auth.register') }}" method="POST">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="full_name">Full Name *</label>
+                        <input type="text" id="full_name" name="full_name" class="form-control" placeholder="e.g. Pardhu Reddy" value="{{ form.get('full_name', '') }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="name@domain.com" value="{{ form.get('email', '') }}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="phone">Mobile Number *</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="10-digit mobile number" value="{{ form.get('phone', '') }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="city">City / Region *</label>
+                        <input type="text" id="city" name="city" class="form-control" placeholder="e.g. Hyderabad" value="{{ form.get('city', '') }}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:2;">
+                        <label class="form-label" for="address">Street Address / Locality *</label>
+                        <input type="text" id="address" name="address" class="form-control" placeholder="House/Flat No, Street, Landmark" value="{{ form.get('address', '') }}" required>
+                    </div>
+
+                    <div class="form-group" style="flex:1;">
+                        <label class="form-label" for="pincode">PIN Code *</label>
+                        <input type="text" id="pincode" name="pincode" class="form-control" placeholder="e.g. 500034" value="{{ form.get('pincode', '') }}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="password">Create Password *</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 6 characters" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="confirm_password">Confirm Password *</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; margin-top:1rem; font-size:1rem;">
+                    Complete Registration
+                </button>
+            </form>
+
+            <div style="text-align:center; margin-top:1.5rem; font-size:0.9rem; color:var(--text-muted);">
+                Already have an account? <a href="{{ url_for('auth.login', role='customer') }}" style="font-weight:700;">Sign in here</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

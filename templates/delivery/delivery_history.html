@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Delivery History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Delivery History</h1>
+        <p class="page-subtitle">Historical archive of all completed refueling services fulfilled by you</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order Code</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Fuel</th>
+                    <th>Litres</th>
+                    <th>Amount Collected</th>
+                    <th>Delivery City</th>
+                    <th>Completion Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if orders %}
+                    {% for o in orders %}
+                    <tr>
+                        <td style="font-weight:700; color:var(--primary);">{{ o.order_code }}</td>
+                        <td style="font-weight:600;">{{ o.customer_name }}</td>
+                        <td>{{ o.customer_phone }}</td>
+                        <td><span class="badge {% if o.fuel_type=='Petrol' %}badge-placed{% else %}badge-confirmed{% endif %}">{{ o.fuel_type }}</span></td>
+                        <td>{{ o.quantity_litres }} L</td>
+                        <td style="font-weight:700; color:var(--navy-dark);">{{ o.total_amount | currency }}</td>
+                        <td>{{ o.city }}</td>
+                        <td>{{ o.updated_at | fmt_datetime }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding:3rem 1.5rem; color:var(--text-muted);">
+                            No completed deliveries logged yet.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

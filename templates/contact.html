@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Contact Us – Petrol Buddy{% endblock %}
+
+{% block public_content %}
+<!-- Hero Banner -->
+<section class="hero-section">
+  <div class="hero-content">
+    <span class="hero-tag">CONTACT &amp; SUPPORT</span>
+    <h1 class="hero-title">We're Here to Help 24/7</h1>
+    <p class="hero-desc">Have a question, need support, or want to partner with us? Reach out and our team will respond promptly.</p>
+  </div>
+</section>
+
+<!-- Contact Info + Form Grid -->
+<section style="padding:4rem 2rem;max-width:1100px;margin:0 auto;">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem;">
+    <!-- Left: Contact Info Cards -->
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+      <div class="card" style="display:flex;align-items:flex-start;gap:1rem;">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(249,115,22,0.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">📞</div>
+        <div>
+          <h3 style="color:#ffffff;font-size:1rem;margin-bottom:0.35rem;">Phone</h3>
+          <p style="color:#94a3b8;font-size:0.95rem;margin:0;">+91 98765 43210</p>
+          <p style="color:#64748b;font-size:0.8rem;margin-top:0.25rem;">Available 24/7 for emergencies</p>
+        </div>
+      </div>
+      <div class="card" style="display:flex;align-items:flex-start;gap:1rem;">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(249,115,22,0.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">📧</div>
+        <div>
+          <h3 style="color:#ffffff;font-size:1rem;margin-bottom:0.35rem;">Email</h3>
+          <p style="color:#94a3b8;font-size:0.95rem;margin:0;">support@petrolbuddy.in</p>
+          <p style="color:#64748b;font-size:0.8rem;margin-top:0.25rem;">We respond within 2 hours</p>
+        </div>
+      </div>
+      <div class="card" style="display:flex;align-items:flex-start;gap:1rem;">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(249,115,22,0.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">📍</div>
+        <div>
+          <h3 style="color:#ffffff;font-size:1rem;margin-bottom:0.35rem;">Office Address</h3>
+          <p style="color:#94a3b8;font-size:0.95rem;margin:0;">Petrol Buddy HQ<br>Hyderabad, Telangana 500081<br>India</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Contact Form -->
+    <div class="card">
+      <h2 class="card-title" style="color:#f97316;margin-bottom:1.5rem;">Send Us a Message</h2>
+      <form method="POST" action="{{ url_for('public.contact') }}">
+        <div class="form-group">
+          <label class="form-label" for="name">Your Name</label>
+          <input type="text" id="name" name="name" class="form-control" placeholder="John Doe" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="john@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="subject">Subject</label>
+          <input type="text" id="subject" name="subject" class="form-control" placeholder="How can we help?" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="message">Message</label>
+          <textarea id="message" name="message" class="form-control" rows="5" placeholder="Describe your query in detail..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section style="padding:4rem 2rem;background:#1e293b;">
+  <div style="max-width:800px;margin:0 auto;">
+    <h2 style="text-align:center;color:#ffffff;font-size:2rem;margin-bottom:0.5rem;">Frequently Asked Questions</h2>
+    <p style="text-align:center;color:#94a3b8;margin-bottom:2.5rem;">Quick answers to common queries about Petrol Buddy.</p>
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <div class="card">
+        <h4 style="color:#f97316;margin-bottom:0.5rem;">Is doorstep fuel delivery legal?</h4>
+        <p style="color:#94a3b8;line-height:1.7;margin:0;">Yes. Doorstep fuel delivery is permitted under regulations in many states when operated by licensed agencies using compliant mini-tankers. Petrol Buddy adheres to all applicable safety and transport guidelines.</p>
+      </div>
+      <div class="card">
+        <h4 style="color:#f97316;margin-bottom:0.5rem;">Is there a minimum or maximum order limit?</h4>
+        <p style="color:#94a3b8;line-height:1.7;margin:0;">The minimum order is 5 litres to ensure delivery efficiency. Maximum order limits depend on your area and vehicle tank capacity — typically up to 100 litres per order for individual customers.</p>
+      </div>
+      <div class="card">
+        <h4 style="color:#f97316;margin-bottom:0.5rem;">What payment methods are accepted?</h4>
+        <p style="color:#94a3b8;line-height:1.7;margin:0;">We accept UPI (GPay, PhonePe, Paytm), credit/debit cards, net banking, and cash on delivery. All digital transactions are secured with 256-bit encryption.</p>
+      </div>
+      <div class="card">
+        <h4 style="color:#f97316;margin-bottom:0.5rem;">How can I track my order?</h4>
+        <p style="color:#94a3b8;line-height:1.7;margin:0;">Once your order is confirmed, you can track its status in real time from your customer dashboard. You'll receive updates at each stage — confirmed, dispatched, out for delivery, and delivered.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">My Orders</h1>
+        <p class="page-subtitle">View and manage all your fuel orders</p>
+    </div>
+    <a href="{{ url_for('customer.place_order') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i>&nbsp; New Order
+    </a>
+</div>
+
+{% if orders and orders | length > 0 %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order Code</th>
+                    <th>Fuel Type</th>
+                    <th>Qty (L)</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Delivery Partner</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><strong>{{ order.order_code }}</strong></td>
+                    <td>{{ order.fuel_type }}</td>
+                    <td>{{ order.quantity_litres }}</td>
+                    <td>{{ order.total_amount | currency }}</td>
+                    <td>{{ order.payment_method }}</td>
+                    <td>
+                        {% if order.partner_name %}
+                            {{ order.partner_name }}<br>
+                            <small style="color: #94a3b8;">
+                                <i class="fas fa-phone"></i> {{ order.partner_phone }}
+                            </small>
+                        {% else %}
+                            <span style="color: #64748b;">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if order.status == 'Placed' %}
+                            <span class="badge badge-placed">Placed</span>
+                        {% elif order.status == 'Confirmed' %}
+                            <span class="badge badge-confirmed">Confirmed</span>
+                        {% elif order.status == 'Partner Assigned' %}
+                            <span class="badge badge-assigned">Partner Assigned</span>
+                        {% elif order.status == 'Out for Delivery' %}
+                            <span class="badge badge-out">Out for Delivery</span>
+                        {% elif order.status == 'Delivered' %}
+                            <span class="badge badge-delivered">Delivered</span>
+                        {% elif order.status == 'Cancelled' %}
+                            <span class="badge badge-cancelled">Cancelled</span>
+                        {% elif order.status == 'Rejected' %}
+                            <span class="badge badge-rejected">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ order.created_at | fmt_date }}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            {% if order.status in ['Placed', 'Confirmed'] %}
+                            <form method="POST" action="{{ url_for('customer.cancel_order', order_id=order.id) }}"
+                                  onsubmit="return confirm('Are you sure you want to cancel this order?');"
+                                  style="display: inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-times"></i>&nbsp; Cancel
+                                </button>
+                            </form>
+                            {% endif %}
+                            <a href="{{ url_for('customer.track_order', id=order.id) }}" class="btn btn-outline btn-sm">
+                                <i class="fas fa-map-marker-alt"></i>&nbsp; Track
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 3rem 1rem;">
+    <i class="fas fa-shopping-bag" style="font-size: 3rem; color: #475569; margin-bottom: 1rem;"></i>
+    <h3 style="color: #e2e8f0; margin-bottom: 0.5rem;">No orders found</h3>
+    <p style="color: #94a3b8; margin-bottom: 1.5rem;">You haven't placed any fuel orders yet. Get started now!</p>
+    <a href="{{ url_for('customer.place_order') }}" class="btn btn-primary">
+        <i class="fas fa-gas-pump"></i>&nbsp; Place Your First Order
+    </a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Petrol Buddy{% endblock %} — Online Petrol Delivery</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<header class="navbar no-print">
+  <a href="{{ url_for('public.index') }}" class="nav-brand">
+    <div class="brand-badge">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 22V4c0-1.1.9-2 2-2h8c1.1 0 2 .9 2 2v18H4zm2-14h8V4H6v4z"/><circle cx="10" cy="14" r="2"/>
+      </svg>
+    </div>
+    <div class="brand-text">Petrol<span>Buddy</span></div>
+  </a>
+
+  {% if current_user %}
+  <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Sidebar">☰</button>
+  {% endif %}
+
+  <nav>
+    <ul class="nav-menu">
+      {% if not current_user %}
+        <li><a href="{{ url_for('public.index') }}" {% if request.endpoint=='public.index' %}class="active"{% endif %}>Home</a></li>
+        <li><a href="{{ url_for('public.about') }}" {% if request.endpoint=='public.about' %}class="active"{% endif %}>About</a></li>
+        <li><a href="{{ url_for('public.contact') }}" {% if request.endpoint=='public.contact' %}class="active"{% endif %}>Contact</a></li>
+        <li><a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-sm">Login</a></li>
+        <li><a href="{{ url_for('auth.register') }}" class="btn btn-outline btn-sm" style="color:#fff;border-color:#475569;">Register</a></li>
+      {% else %}
+        <li>
+          <div class="nav-user-pill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>{{ current_user.full_name }}</span>
+            <span class="nav-user-role">{{ current_user.role | upper }}</span>
+          </div>
+        </li>
+        <li>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm">Logout</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+</header>
+
+<!-- ═══ FLASH MESSAGES ═══ -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div style="position:fixed;top:72px;right:1.5rem;z-index:999;min-width:320px;max-width:500px;">
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}" style="margin-bottom:0.5rem;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+          <span>{{ msg }}</span>
+          <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% if current_user %}
+<!-- ═══ APP LAYOUT WITH SIDEBAR ═══ -->
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar no-print" id="appSidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-user-title">{{ current_user.full_name }}</div>
+      <div class="sidebar-user-role">{{ current_user.role | upper }} PANEL</div>
+    </div>
+    <ul class="sidebar-nav">
+      {% if current_user.role == 'customer' %}
+        <li class="sidebar-item">
+          <a href="{{ url_for('customer.dashboard') }}" class="sidebar-link {% if request.endpoint=='customer.dashboard' %}active{% endif %}">
+            &#9632; Dashboard
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="{{ url_for('customer.place_order') }}" class="sidebar-link {% if request.endpoint=='customer.place_order' %}active{% endif %}">
+            &#9635; Order Fuel Now
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="{{ url_for('customer.my_orders') }}" class="sidebar-link {% if request.endpoint=='customer.my_orders' %}active{% endif %}">
+            &#9634; My Orders
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="{{ url_for('customer.track_order') }}" class="sidebar-link {% if request.endpoint=='customer.track_order' %}active{% endif %}">
+            &#9656; Track Order
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="{{ url_for('customer.feedback') }}" class="sidebar-link {% if request.endpoint=='customer.feedback' %}active{% endif %}">
+            &#9733; Submit Feedback
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="{{ url_for('customer.profile') }}" class="sidebar-link {% if request.endpoint=='customer.profile' %}active{% endif %}">
+            &#9728; My Profile
+          </a>
+        </li>
+
+      {% elif current_user.role == 'admin' %}
+        <li class="sidebar-item"><a href="{{ url_for('admin.dashboard') }}" class="sidebar-link {% if request.endpoint=='admin.dashboard' %}active{% endif %}">&#9632; Dashboard</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('admin.manage_orders') }}" class="sidebar-link {% if request.endpoint=='admin.manage_orders' %}active{% endif %}">&#9634; Manage Orders</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('admin.manage_inventory') }}" class="sidebar-link {% if request.endpoint=='admin.manage_inventory' %}active{% endif %}">&#9670; Fuel Inventory</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('admin.manage_prices') }}" class="sidebar-link {% if request.endpoint=='admin.manage_prices' %}active{% endif %}">&#36; Fuel Pricing</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('admin.manage_customers') }}" class="sidebar-link {% if request.endpoint=='admin.manage_customers' %}active{% endif %}">&#9728; Customers</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('admin.manage_delivery_partners') }}" class="sidebar-link {% if request.endpoint=='admin.manage_delivery_partners' %}active{% endif %}">&#9656; Delivery Partners</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('admin.manage_payments') }}" class="sidebar-link {% if request.endpoint=='admin.manage_payments' %}active{% endif %}">&#9654; Payments</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('admin.manage_feedback') }}" class="sidebar-link {% if request.endpoint=='admin.manage_feedback' %}active{% endif %}">&#9733; Feedback</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('admin.reports') }}" class="sidebar-link {% if request.endpoint=='admin.reports' %}active{% endif %}">&#9633; Reports</a></li>
+
+      {% elif current_user.role == 'delivery' %}
+        <li class="sidebar-item"><a href="{{ url_for('delivery.dashboard') }}" class="sidebar-link {% if request.endpoint=='delivery.dashboard' %}active{% endif %}">&#9632; Dashboard</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('delivery.assigned_orders') }}" class="sidebar-link {% if request.endpoint in ['delivery.assigned_orders','delivery.order_details'] %}active{% endif %}">&#9656; Assigned Orders</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('delivery.delivery_history') }}" class="sidebar-link {% if request.endpoint=='delivery.delivery_history' %}active{% endif %}">&#9634; History</a></li>
+        <li class="sidebar-item"><a href="{{ url_for('delivery.profile') }}" class="sidebar-link {% if request.endpoint=='delivery.profile' %}active{% endif %}">&#9728; Profile</a></li>
+      {% endif %}
+    </ul>
+    <div class="sidebar-footer">
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm" style="width:100%;color:#ef4444;border-color:#ef4444;">
+        Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+{% else %}
+<!-- ═══ PUBLIC LAYOUT ═══ -->
+{% block public_content %}{% endblock %}
+{% endif %}
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer no-print">
+  <div class="footer-content">
+    <div class="footer-brand">
+      <span style="color:#f97316;">Petrol Buddy</span> &bull; On-Demand Doorstep Fuel Delivery
+      <div style="font-size:0.8rem;color:#64748b;font-weight:normal;margin-top:4px;">
+        Safe, certified fuel delivered directly to your vehicle or equipment.
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="{{ url_for('public.index') }}">Home</a>
+      <a href="{{ url_for('public.about') }}">About</a>
+      <a href="{{ url_for('public.contact') }}">Contact</a>
+      <a href="{{ url_for('auth.login') }}">Login</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; {{ now.year }} <strong>Petrol Buddy</strong>. College Mini-Project &mdash; Designed by <strong>Pardhu</strong>.
+    Built with Python Flask + MySQL.
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

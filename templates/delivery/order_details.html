@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Order Details - {{ order.order_code }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Delivery Job: {{ order.order_code }}</h1>
+        <p class="page-subtitle">Scheduled fulfillment for {{ order.preferred_date | fmt_date }} at {{ order.preferred_time }}</p>
+    </div>
+    <div>
+        <a href="{{ url_for('delivery.assigned_orders') }}" class="btn btn-outline">&larr; Back to Assigned Orders</a>
+    </div>
+</div>
+
+<div class="grid-cols-2" style="margin-bottom:1.5rem;">
+    <!-- Order Information -->
+    <div class="card">
+        <h2 class="card-title">Fuel & Booking Specs</h2>
+        <table class="table" style="border:none;">
+            <tbody>
+                <tr>
+                    <td style="color:var(--text-muted); width:40%;">Order Code:</td>
+                    <td style="font-weight:700; color:var(--primary);">{{ order.order_code }}</td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-muted);">Fuel Type:</td>
+                    <td><span class="badge {% if order.fuel_type=='Petrol' %}badge-placed{% else %}badge-confirmed{% endif %}">{{ order.fuel_type }}</span></td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-muted);">Quantity:</td>
+                    <td style="font-size:1.15rem; font-weight:700;">{{ order.quantity_litres }} Litres</td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-muted);">Price per Litre:</td>
+                    <td>{{ order.price_per_litre | currency }}</td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-muted);">Total Payable:</td>
+                    <td style="font-size:1.25rem; font-weight:800; color:var(--navy-dark);">{{ order.total_amount | currency }}</td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-muted);">Payment Mode:</td>
+                    <td>
+                        <strong>{{ order.payment_method }}</strong>
+                        {% if payment %}
+                            &bull; <span class="badge {% if payment.payment_status=='Paid' %}badge-paid{% else %}badge-pending{% endif %}">{{ payment.payment_status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-muted);">Current Status:</td>
+                    <td>
+                        <span class="badge {% if order.status=='Delivered' %}badge-delivered{% elif order.status=='Out for Delivery' %}badge-out{% else %}badge-assigned{% endif %}">
+                            {{ order.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% if order.additional_instructions %}
+                <tr>
+                    <td style="color:var(--text-muted);">Instructions:</td>
+                    <td style="font-style:italic;">"{{ order.additional_instructions }}"</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Customer & Location -->
+    <div class="card">
+        <h2 class="card-title">Customer & Destination</h2>
+        <table class="table" style="border:none;">
+            <tbody>
+                <tr>
+                    <td style="color:var(--text-muted); width:40%;">Customer Name:</td>
+                    <td style="font-weight:700; color:var(--navy-dark);">{{ order.customer_name }}</td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-muted);">Phone Contact:</td>
+                    <td>
+                        <a href="tel:{{ order.customer_phone }}" class="btn btn-outline btn-sm" style="font-weight:700; color:var(--primary); border-color:var(--primary);">
+                            📞 {{ order.customer_phone }}
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-muted);">Street Address:</td>
+                    <td style="line-height:1.6;">{{ order.delivery_address }}</td>
+                </tr>
+                <tr>
+                    <td style="color:var(--text-muted);">City & PIN:</td>
+                    <td>{{ order.city }} &mdash; {{ order.pincode }}</td>
+                </tr>
+                {% if order.landmark %}
+                <tr>
+                    <td style="color:var(--text-muted);">Landmark:</td>
+                    <td>📍 {{ order.landmark }}</td>
+                </tr>
+                {% endif %}
+                {% if order.location_description %}
+                <tr>
+                    <td style="color:var(--text-muted);">Specific Spot:</td>
+                    <td>{{ order.location_description }}</td>
+                </tr>
+                {% endif %}
+                {% if order.latitude and order.longitude %}
+                <tr>
+                    <td style="color:var(--text-muted);">GPS Coordinates:</td>
+                    <td>
+                        <code style="background:#f1f5f9; padding:3px 6px; border-radius:4px;">{{ order.latitude }}, {{ order.longitude }}</code>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Fulfillment Action Controls -->
+<div class="card" style="border-top:4px solid var(--primary);">
+    <h2 class="card-title">Delivery Progress Action</h2>
+    
+    {% if order.status == 'Partner Assigned' %}
+        <p style="color:var(--text-muted); margin-bottom:1.25rem;">
+            You have accepted this delivery dispatch. Once your Bowser vehicle leaves the depot, mark it as <strong>Out for Delivery</strong> so the customer can track your route.
+        </p>
+        <form action="{{ url_for('delivery.order_details', order_id=order.id) }}" method="POST">
+            <input type="hidden" name="action" value="start">
+            <button type="submit" class="btn btn-primary btn-lg" style="padding:14px 28px;">
+                🚚 Start Delivery &mdash; Mark Out for Delivery
+            </button>
+        </form>
+
+    {% elif order.status == 'Out for Delivery' %}
+        <p style="color:var(--text-muted); margin-bottom:1.25rem;">
+            Dispense fuel using calibrated metering equipment.
+            {% if order.payment_method == 'Cash on Delivery' and payment.payment_status != 'Paid' %}
+                <br><strong style="color:var(--warning);">⚠️ Collect {{ order.total_amount | currency }} in cash before completing this delivery!</strong>
+            {% endif %}
+        </p>
+        <form action="{{ url_for('delivery.order_details', order_id=order.id) }}" method="POST">
+            <input type="hidden" name="action" value="complete">
+            <button type="submit" class="btn btn-success btn-lg" style="padding:14px 28px;" onclick="return confirm('Confirm that fuel has been dispensed and payment verified?')">
+                ✅ Complete Delivery & Confirm Payment
+            </button>
+        </form>
+
+    {% elif order.status == 'Delivered' %}
+        <div class="alert alert-success" style="margin:0;">
+            <span>🎉 This order has been successfully delivered and finalized.</span>
+        </div>
+    {% else %}
+        <p style="color:var(--text-muted); margin:0;">
+            This order is currently <strong>{{ order.status }}</strong>. No partner actions required.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

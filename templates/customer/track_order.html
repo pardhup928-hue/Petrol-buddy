@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Track Order{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Live Order Tracking</h1>
+        <p class="page-subtitle">Monitor the real-time status of your delivery</p>
+    </div>
+</div>
+
+<!-- Order Selector -->
+<div class="card">
+    <h2 class="card-title"><i class="fas fa-list"></i>&nbsp; Select an Order</h2>
+    {% if all_orders and all_orders | length > 0 %}
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        {% for o in all_orders %}
+        <a href="{{ url_for('customer.track_order', id=o.id) }}"
+           class="btn {{ 'btn-primary' if selected_id == o.id else 'btn-outline' }} btn-sm">
+            {{ o.order_code }}
+            {% if o.status == 'Placed' %}
+                <span class="badge badge-placed" style="margin-left: 0.3rem;">Placed</span>
+            {% elif o.status == 'Confirmed' %}
+                <span class="badge badge-confirmed" style="margin-left: 0.3rem;">Confirmed</span>
+            {% elif o.status == 'Partner Assigned' %}
+                <span class="badge badge-assigned" style="margin-left: 0.3rem;">Assigned</span>
+            {% elif o.status == 'Out for Delivery' %}
+                <span class="badge badge-out" style="margin-left: 0.3rem;">Out</span>
+            {% elif o.status == 'Delivered' %}
+                <span class="badge badge-delivered" style="margin-left: 0.3rem;">Delivered</span>
+            {% elif o.status == 'Cancelled' %}
+                <span class="badge badge-cancelled" style="margin-left: 0.3rem;">Cancelled</span>
+            {% elif o.status == 'Rejected' %}
+                <span class="badge badge-rejected" style="margin-left: 0.3rem;">Rejected</span>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #94a3b8;">No orders to track.</p>
+    {% endif %}
+</div>
+
+{% if order %}
+<div class="grid-cols-2" style="margin-top: 1.5rem;">
+    <!-- Order Details -->
+    <div class="card">
+        <h2 class="card-title"><i class="fas fa-info-circle"></i>&nbsp; Order Details</h2>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td style="color: #94a3b8; font-weight: 500;">Order Code</td>
+                    <td><strong>{{ order.order_code }}</strong></td>
+                </tr>
+                <tr>
+                    <td style="color: #94a3b8; font-weight: 500;">Fuel Type</td>
+                    <td>{{ order.fuel_type }}</td>
+                </tr>
+                <tr>
+                    <td style="color: #94a3b8; font-weight: 500;">Quantity</td>
+                    <td>{{ order.quantity_litres }} litres</td>
+                </tr>
+                <tr>
+                    <td style="color: #94a3b8; font-weight: 500;">Total Amount</td>
+                    <td style="color: #f97316; font-weight: 600;">{{ order.total_amount | currency }}</td>
+                </tr>
+                <tr>
+                    <td style="color: #94a3b8; font-weight: 500;">Status</td>
+                    <td>
+                        {% if order.status == 'Placed' %}
+                            <span class="badge badge-placed">Placed</span>
+                        {% elif order.status == 'Confirmed' %}
+                            <span class="badge badge-confirmed">Confirmed</span>
+                        {% elif order.status == 'Partner Assigned' %}
+                            <span class="badge badge-assigned">Partner Assigned</span>
+                        {% elif order.status == 'Out for Delivery' %}
+                            <span class="badge badge-out">Out for Delivery</span>
+                        {% elif order.status == 'Delivered' %}
+                            <span class="badge badge-delivered">Delivered</span>
+                        {% elif order.status == 'Cancelled' %}
+                            <span class="badge badge-cancelled">Cancelled</span>
+                        {% elif order.status == 'Rejected' %}
+                            <span class="badge badge-rejected">Rejected</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        {% if order.partner_name %}
+        <div style="margin-top: 1rem; padding: 1rem; background: rgba(59,130,246,0.08); border-radius: 10px; border: 1px solid rgba(59,130,246,0.2);">
+            <h3 style="color: #e2e8f0; font-size: 0.95rem; margin-bottom: 0.75rem;">
+                <i class="fas fa-motorcycle" style="color: #3b82f6;"></i>&nbsp; Delivery Partner
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <span style="color: #e2e8f0;">
+                    <i class="fas fa-user" style="color: #94a3b8; width: 1.2rem;"></i>&nbsp;
+                    {{ order.partner_name }}
+                </span>
+                <span style="color: #e2e8f0;">
+                    <i class="fas fa-phone" style="color: #94a3b8; width: 1.2rem;"></i>&nbsp;
+                    {{ order.partner_phone }}
+                </span>
+                {% if order.partner_vehicle %}
+                <span style="color: #e2e8f0;">
+                    <i class="fas fa-truck" style="color: #94a3b8; width: 1.2rem;"></i>&nbsp;
+                    {{ order.partner_vehicle }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Payment Info -->
+    <div class="card">
+        <h2 class="card-title"><i class="fas fa-credit-card"></i>&nbsp; Payment Information</h2>
+        {% if payment %}
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td style="color: #94a3b8; font-weight: 500;">Method</td>
+                    <td>{{ payment.method }}</td>
+                </tr>
+                <tr>
+                    <td style="color: #94a3b8; font-weight: 500;">Amount</td>
+                    <td style="color: #f97316; font-weight: 600;">{{ payment.amount | currency }}</td>
+                </tr>
+                <tr>
+                    <td style="color: #94a3b8; font-weight: 500;">Status</td>
+                    <td>
+                        {% if payment.status == 'Paid' %}
+                            <span class="badge badge-paid">Paid</span>
+                        {% else %}
+                            <span class="badge badge-pending">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: #94a3b8;">Payment information not available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delivery Timeline -->
+<div class="card" style="margin-top: 1.5rem;">
+    <h2 class="card-title"><i class="fas fa-route"></i>&nbsp; Delivery Progress</h2>
+
+    <div class="timeline-container">
+        <div class="timeline">
+            {% set status_keys = [] %}
+            {% for status_key, label in stages %}
+                {% set _ = status_keys.append(status_key) %}
+            {% endfor %}
+
+            {% set current_index = namespace(val=-1) %}
+            {% for status_key, label in stages %}
+                {% if status_key == order.status %}
+                    {% set current_index.val = loop.index0 %}
+                {% endif %}
+            {% endfor %}
+
+            {% for status_key, label in stages %}
+                {% if loop.index0 < current_index.val %}
+                    {% set step_class = 'completed' %}
+                {% elif loop.index0 == current_index.val %}
+                    {% set step_class = 'current' %}
+                {% else %}
+                    {% set step_class = '' %}
+                {% endif %}
+
+                <div class="timeline-step {{ step_class }}">
+                    <div class="timeline-dot">
+                        {% if step_class == 'completed' %}
+                            <i class="fas fa-check"></i>
+                        {% else %}
+                            {{ loop.index }}
+                        {% endif %}
+                    </div>
+                    <div class="timeline-title">{{ label }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- No order selected -->
+<div class="card" style="text-align: center; padding: 3rem 1rem; margin-top: 1.5rem;">
+    <i class="fas fa-map-marked-alt" style="font-size: 3rem; color: #475569; margin-bottom: 1rem;"></i>
+    <h3 style="color: #e2e8f0; margin-bottom: 0.5rem;">No Order Selected</h3>
+    <p style="color: #94a3b8;">Select an order above to track its delivery progress.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Payment Transactions{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Payment & Revenue Tracking</h1>
+        <p class="page-subtitle">Audit Cash on Delivery receipts and simulated online transaction logs</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order Code</th>
+                    <th>Customer</th>
+                    <th>Fuel</th>
+                    <th>Payment Mode</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Transaction Ref</th>
+                    <th>Payment Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if payments %}
+                    {% for p in payments %}
+                    <tr>
+                        <td style="font-weight:700; color:var(--primary);">{{ p.order_code }}</td>
+                        <td>{{ p.customer_name }}</td>
+                        <td><span class="badge {% if p.fuel_type=='Petrol' %}badge-placed{% else %}badge-confirmed{% endif %}">{{ p.fuel_type }}</span></td>
+                        <td>{{ p.payment_method }}</td>
+                        <td style="font-weight:700; color:var(--navy-dark);">{{ p.amount | currency }}</td>
+                        <td>
+                            {% if p.payment_status == 'Paid' %}
+                                <span class="badge badge-paid">Paid</span>
+                            {% elif p.payment_status == 'Refunded' %}
+                                <span class="badge badge-cancelled">Refunded</span>
+                            {% else %}
+                                <span class="badge badge-pending">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td><code style="font-size:0.8rem; background:#f1f5f9; padding:2px 6px; border-radius:4px;">{{ p.transaction_ref or '—' }}</code></td>
+                        <td>{{ p.payment_date | fmt_datetime }}</td>
+                        <td>
+                            {% if p.payment_status == 'Pending' %}
+                                <form action="{{ url_for('admin.manage_payments') }}" method="POST" style="display:inline;">
+                                    <input type="hidden" name="payment_id" value="{{ p.id }}">
+                                    <button type="submit" class="btn btn-success btn-sm">Mark Received</button>
+                                </form>
+                            {% else %}
+                                <span style="font-size:0.8rem; color:var(--text-muted);">Settled</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                            No payment transactions recorded.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

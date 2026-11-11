@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">My Profile</h1>
+        <p class="page-subtitle">Manage your personal details and account settings</p>
+    </div>
+</div>
+
+{% if errors %}
+<div class="alert alert-danger">
+    <i class="fas fa-exclamation-circle"></i>&nbsp;
+    <ul style="margin: 0; padding-left: 1.2rem;">
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="grid-cols-2">
+    <!-- Personal Details -->
+    <div class="card">
+        <h2 class="card-title"><i class="fas fa-user-edit"></i>&nbsp; Personal Details</h2>
+
+        <form method="POST" action="{{ url_for('customer.profile') }}">
+            <input type="hidden" name="action" value="update_profile">
+
+            <div class="form-group">
+                <label class="form-label" for="full_name">Full Name</label>
+                <input type="text" class="form-control" id="full_name" name="full_name"
+                       value="{{ cust.full_name or '' }}" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="phone">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" name="phone"
+                       value="{{ cust.phone or '' }}" placeholder="10-digit phone number" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="address">Address</label>
+                <textarea class="form-control" id="address" name="address" rows="3"
+                          placeholder="Enter your address">{{ cust.address or '' }}</textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="city">City</label>
+                    <input type="text" class="form-control" id="city" name="city"
+                           value="{{ cust.city or '' }}" placeholder="City">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pincode">Pincode</label>
+                    <input type="text" class="form-control" id="pincode" name="pincode"
+                           value="{{ cust.pincode or '' }}" placeholder="6-digit pincode">
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>&nbsp; Update Profile
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card">
+        <h2 class="card-title"><i class="fas fa-lock"></i>&nbsp; Change Password</h2>
+
+        <form method="POST" action="{{ url_for('customer.profile') }}">
+            <input type="hidden" name="action" value="change_password">
+
+            <div class="form-group">
+                <label class="form-label" for="current_password">Current Password</label>
+                <input type="password" class="form-control" id="current_password" name="current_password"
+                       placeholder="Enter current password" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="new_password">New Password</label>
+                <input type="password" class="form-control" id="new_password" name="new_password"
+                       placeholder="Enter new password" required>
+                <span class="form-help">Minimum 6 characters recommended</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirm New Password</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                       placeholder="Re-enter new password" required>
+            </div>
+
+            <div style="margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-key"></i>&nbsp; Change Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Account Info -->
+<div class="card" style="margin-top: 1.5rem;">
+    <h2 class="card-title"><i class="fas fa-info-circle"></i>&nbsp; Account Information</h2>
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-control" value="{{ user.email }}" readonly
+                   style="background: rgba(255,255,255,0.03); color: #94a3b8; cursor: not-allowed;">
+            <span class="form-help">Email cannot be changed. Contact support if needed.</span>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Member Since</label>
+            <input type="text" class="form-control" value="{{ cust.created_at | fmt_date }}" readonly
+                   style="background: rgba(255,255,255,0.03); color: #94a3b8; cursor: not-allowed;">
+        </div>
+    </div>
+</div>
+{% endblock %}

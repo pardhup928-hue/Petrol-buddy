@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-subtitle">Overview of your petrol delivery operations</p>
+    </div>
+</div>
+
+<div class="grid-cols-4" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Orders Today</span>
+            <span class="stat-value">{{ stats.orders_today | default(0) }}</span>
+        </div>
+        <div class="stat-icon" style="background: #f97316;">
+            <i class="fas fa-calendar-day"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Total Orders</span>
+            <span class="stat-value">{{ stats.total_orders | default(0) }}</span>
+        </div>
+        <div class="stat-icon" style="background: #3b82f6;">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Pending Orders</span>
+            <span class="stat-value">{{ stats.pending_orders | default(0) }}</span>
+        </div>
+        <div class="stat-icon" style="background: #f59e0b;">
+            <i class="fas fa-clock"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Active Orders</span>
+            <span class="stat-value">{{ stats.active_orders | default(0) }}</span>
+        </div>
+        <div class="stat-icon" style="background: #6366f1;">
+            <i class="fas fa-truck"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Delivered</span>
+            <span class="stat-value">{{ stats.delivered_orders | default(0) }}</span>
+        </div>
+        <div class="stat-icon" style="background: #22c55e;">
+            <i class="fas fa-check-circle"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Revenue</span>
+            <span class="stat-value">{{ stats.revenue | default(0) | currency }}</span>
+        </div>
+        <div class="stat-icon" style="background: #a855f7;">
+            <i class="fas fa-rupee-sign"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Customers</span>
+            <span class="stat-value">{{ stats.total_customers | default(0) }}</span>
+        </div>
+        <div class="stat-icon" style="background: #14b8a6;">
+            <i class="fas fa-users"></i>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Available Partners</span>
+            <span class="stat-value">{{ stats.available_partners | default(0) }}</span>
+        </div>
+        <div class="stat-icon" style="background: #ec4899;">
+            <i class="fas fa-motorcycle"></i>
+        </div>
+    </div>
+</div>
+
+{% if low_stock %}
+<div style="margin-bottom: 2rem;">
+    {% for item in low_stock %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Low Stock Alert:</strong> {{ item.fuel_type }} is running low — only <strong>{{ item.available_litres }} litres</strong> remaining (minimum threshold: {{ item.minimum_threshold }} litres).
+        <a href="{{ url_for('admin.manage_inventory') }}" style="margin-left: 0.5rem; font-weight: 600;">Restock Now &rarr;</a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+    <h2 class="card-title"><i class="fas fa-history"></i> Recent Orders</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order Code</th>
+                    <th>Customer</th>
+                    <th>Fuel Type</th>
+                    <th>Qty (L)</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Partner</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent %}
+                <tr>
+                    <td><strong>{{ order.order_code }}</strong></td>
+                    <td>{{ order.customer_name }}</td>
+                    <td>{{ order.fuel_type }}</td>
+                    <td>{{ order.quantity_litres }} L</td>
+                    <td>{{ order.total_amount | currency }}</td>
+                    <td>
+                        {% if order.status == 'Placed' %}
+                            <span class="badge badge-placed">Placed</span>
+                        {% elif order.status == 'Confirmed' %}
+                            <span class="badge badge-confirmed">Confirmed</span>
+                        {% elif order.status == 'Partner Assigned' %}
+                            <span class="badge badge-assigned">Assigned</span>
+                        {% elif order.status == 'Out for Delivery' %}
+                            <span class="badge badge-out">Out for Delivery</span>
+                        {% elif order.status == 'Delivered' %}
+                            <span class="badge badge-delivered">Delivered</span>
+                        {% elif order.status == 'Cancelled' %}
+                            <span class="badge badge-cancelled">Cancelled</span>
+                        {% elif order.status == 'Rejected' %}
+                            <span class="badge badge-rejected">Rejected</span>
+                        {% else %}
+                            <span class="badge">{{ order.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ order.partner_name | default('—', true) }}</td>
+                    <td>{{ order.created_at | fmt_datetime }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: #94a3b8;">No recent orders found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

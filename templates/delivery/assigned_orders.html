@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Assigned Deliveries{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Active Assigned Deliveries</h1>
+        <p class="page-subtitle">Doorstep refueling requests queued for dispatch and ongoing fulfillment</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order Code</th>
+                    <th>Customer Name</th>
+                    <th>Contact Phone</th>
+                    <th>Fuel & Litres</th>
+                    <th>Delivery Address</th>
+                    <th>Scheduled Slot</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if orders %}
+                    {% for o in orders %}
+                    <tr>
+                        <td style="font-weight:700; color:var(--primary);">{{ o.order_code }}</td>
+                        <td style="font-weight:600; color:var(--navy-dark);">{{ o.customer_name }}</td>
+                        <td><a href="tel:{{ o.customer_phone }}">{{ o.customer_phone }}</a></td>
+                        <td>
+                            <span class="badge {% if o.fuel_type=='Petrol' %}badge-placed{% else %}badge-confirmed{% endif %}">{{ o.fuel_type }}</span>
+                            <strong>{{ o.quantity_litres }} L</strong>
+                        </td>
+                        <td style="max-width:240px; font-size:0.85rem;">
+                            {{ o.delivery_address }}
+                            {% if o.landmark %}<br><span style="color:var(--text-muted);">Near: {{ o.landmark }}</span>{% endif %}
+                        </td>
+                        <td>{{ o.preferred_date | fmt_date }} at {{ o.preferred_time }}</td>
+                        <td style="font-weight:700; color:var(--navy-dark);">{{ o.total_amount | currency }}</td>
+                        <td>
+                            {% if o.status == 'Partner Assigned' %}
+                                <span class="badge badge-assigned">Assigned</span>
+                            {% elif o.status == 'Out for Delivery' %}
+                                <span class="badge badge-out">Out for Delivery</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('delivery.order_details', order_id=o.id) }}" class="btn btn-primary btn-sm">
+                                Manage Delivery &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding:3rem 1.5rem; color:var(--text-muted);">
+                            <div style="font-size:2rem; margin-bottom:8px;">🚚</div>
+                            <strong>No pending deliveries assigned right now.</strong><br>
+                            Make sure your status is marked "Available" to receive incoming dispatch orders.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

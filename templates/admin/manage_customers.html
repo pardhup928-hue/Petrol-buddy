@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Customer Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Customer Accounts</h1>
+        <p class="page-subtitle">View registered consumers, monitor account standing, and toggle access</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:1.5rem; padding:1rem 1.25rem;">
+    <form action="{{ url_for('admin.manage_customers') }}" method="GET" style="display:flex; gap:10px;">
+        <input type="text" name="q" class="form-control" placeholder="Search by customer name, email, or mobile..." value="{{ search }}">
+        <button type="submit" class="btn btn-primary" style="white-space:nowrap;">Search</button>
+        {% if search %}
+            <a href="{{ url_for('admin.manage_customers') }}" class="btn btn-outline" style="white-space:nowrap;">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>City</th>
+                    <th>Status</th>
+                    <th>Joined Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if customers %}
+                    {% for c in customers %}
+                    <tr>
+                        <td style="font-weight:600; color:var(--navy-dark);">{{ c.full_name }}</td>
+                        <td>{{ c.email }}</td>
+                        <td>{{ c.phone }}</td>
+                        <td>{{ c.city }}</td>
+                        <td>
+                            {% if c.status == 'active' %}
+                                <span class="badge badge-active">Active</span>
+                            {% else %}
+                                <span class="badge badge-inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ c.joined | fmt_date }}</td>
+                        <td>
+                            <form action="{{ url_for('admin.manage_customers') }}" method="POST" style="display:inline;">
+                                <input type="hidden" name="user_id" value="{{ c.user_id }}">
+                                {% if c.status == 'active' %}
+                                    <input type="hidden" name="action" value="deactivate">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Deactivate this customer account?')">Deactivate</button>
+                                {% else %}
+                                    <input type="hidden" name="action" value="activate">
+                                    <button type="submit" class="btn btn-success btn-sm">Activate</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                            No customer records found matching criteria.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Orders{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Manage Orders</h1>
+        <p class="page-subtitle">View, confirm, assign, and update all customer orders</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <h2 class="card-title"><i class="fas fa-filter"></i> Filter Orders</h2>
+    <form method="GET" action="{{ url_for('admin.manage_orders') }}">
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label class="form-label" for="q">Search</label>
+                <input type="text" class="form-control" id="q" name="q" placeholder="Search by order code or customer name..." value="{{ request.args.get('q', '') }}">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label" for="status_filter">Status</label>
+                <select class="form-control" id="status_filter" name="status_filter">
+                    <option value="">All Statuses</option>
+                    {% for s in statuses %}
+                    <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label" for="date_from">From Date</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request.args.get('date_from', '') }}">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label" for="date_to">To Date</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request.args.get('date_to', '') }}">
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filter</button>
+            <a href="{{ url_for('admin.manage_orders') }}" class="btn btn-outline">Clear Filters</a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2 class="card-title"><i class="fas fa-list"></i> Orders ({{ orders | length }})</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order Code</th>
+                    <th>Customer</th>
+                    <th>Fuel</th>
+                    <th>Qty (L)</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Partner</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><strong>{{ order.order_code }}</strong></td>
+                    <td>{{ order.customer_name }}</td>
+                    <td>{{ order.fuel_type }}</td>
+                    <td>{{ order.quantity_litres }} L</td>
+                    <td>{{ order.total_amount | currency }}</td>
+                    <td>
+                        {% if order.status == 'Placed' %}
+                            <span class="badge badge-placed">Placed</span>
+                        {% elif order.status == 'Confirmed' %}
+                            <span class="badge badge-confirmed">Confirmed</span>
+                        {% elif order.status == 'Partner Assigned' %}
+                            <span class="badge badge-assigned">Partner Assigned</span>
+                        {% elif order.status == 'Out for Delivery' %}
+                            <span class="badge badge-out">Out for Delivery</span>
+                        {% elif order.status == 'Delivered' %}
+                            <span class="badge badge-delivered">Delivered</span>
+                        {% elif order.status == 'Cancelled' %}
+                            <span class="badge badge-cancelled">Cancelled</span>
+                        {% elif order.status == 'Rejected' %}
+                            <span class="badge badge-rejected">Rejected</span>
+                        {% else %}
+                            <span class="badge">{{ order.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ order.partner_name | default('—', true) }}</td>
+                    <td>{{ order.created_at | fmt_date }}</td>
+                    <td>
+                        {% if order.status == 'Placed' %}
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <form method="POST" action="{{ url_for('admin.manage_orders') }}" style="display: inline;">
+                                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                                    <input type="hidden" name="action" value="confirm">
+                                    <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Confirm</button>
+                                </form>
+                                <details style="position: relative;">
+                                    <summary class="btn btn-danger btn-sm" style="cursor: pointer;"><i class="fas fa-times"></i> Reject</summary>
+                                    <div style="position: absolute; top: 100%; right: 0; z-index: 10; background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem; padding: 1rem; margin-top: 0.5rem; min-width: 250px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+                                        <form method="POST" action="{{ url_for('admin.manage_orders') }}">
+                                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                                            <input type="hidden" name="action" value="reject">
+                                            <div class="form-group" style="margin-bottom: 0.75rem;">
+                                                <label class="form-label">Reason for rejection</label>
+                                                <input type="text" class="form-control" name="rejection_reason" placeholder="Enter reason..." required>
+                                            </div>
+                                            <button type="submit" class="btn btn-danger btn-sm" style="width: 100%;"><i class="fas fa-ban"></i> Confirm Rejection</button>
+                                        </form>
+                                    </div>
+                                </details>
+                            </div>
+
+                        {% elif order.status == 'Confirmed' %}
+                            <form method="POST" action="{{ url_for('admin.manage_orders') }}" style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="hidden" name="order_id" value="{{ order.id }}">
+                                <input type="hidden" name="action" value="assign">
+                                <select name="partner_id" class="form-control" style="min-width: 140px; padding: 0.35rem 0.5rem; font-size: 0.85rem;" required>
+                                    <option value="">Select Partner</option>
+                                    {% for partner in partners %}
+                                    <option value="{{ partner.id }}">{{ partner.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Assign</button>
+                            </form>
+
+                        {% elif order.status == 'Partner Assigned' %}
+                            <form method="POST" action="{{ url_for('admin.manage_orders') }}" style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="hidden" name="order_id" value="{{ order.id }}">
+                                <input type="hidden" name="action" value="status_update">
+                                <select name="new_status" class="form-control" style="min-width: 150px; padding: 0.35rem 0.5rem; font-size: 0.85rem;" required>
+                                    <option value="">Change Status</option>
+                                    <option value="Out for Delivery">Out for Delivery</option>
+                                    <option value="Delivered">Delivered</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-sync-alt"></i> Update</button>
+                            </form>
+
+                        {% elif order.status == 'Out for Delivery' %}
+                            <form method="POST" action="{{ url_for('admin.manage_orders') }}" style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="hidden" name="order_id" value="{{ order.id }}">
+                                <input type="hidden" name="action" value="status_update">
+                                <select name="new_status" class="form-control" style="min-width: 150px; padding: 0.35rem 0.5rem; font-size: 0.85rem;" required>
+                                    <option value="">Change Status</option>
+                                    <option value="Delivered">Delivered</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-sync-alt"></i> Update</button>
+                            </form>
+
+                        {% else %}
+                            <span style="color: #64748b;">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if order.rejection_reason %}
+                <tr>
+                    <td colspan="9" style="padding: 0.5rem 1rem; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444;">
+                        <small style="color: #fca5a5;"><i class="fas fa-info-circle"></i> <strong>Rejection Reason:</strong> {{ order.rejection_reason }}</small>
+                    </td>
+                </tr>
+                {% endif %}
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">No orders found matching your criteria.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

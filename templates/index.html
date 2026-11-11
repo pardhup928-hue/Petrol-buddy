@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Petrol Buddy – Doorstep Fuel Delivery{% endblock %}
+
+{% block public_content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-content">
+    <span class="hero-tag">24/7 ON-DEMAND DOORSTEP REFUELING</span>
+    <h1 class="hero-title">Quality Petrol &amp; Diesel Delivered Straight to You</h1>
+    <p class="hero-desc">Skip the pump queues. Petrol Buddy brings certified fuel to your doorstep — anytime, anywhere. Fast, safe, and transparent pricing every time.</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Get Started Free</a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-lg">Sign In</a>
+    </div>
+  </div>
+</section>
+
+<!-- Live Fuel Price Ticker -->
+<section style="background:#1e293b;padding:1rem 0;">
+  <div style="max-width:900px;margin:0 auto;display:flex;justify-content:center;align-items:center;gap:3rem;flex-wrap:wrap;padding:0.5rem 1rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <span style="font-size:1.5rem;">⛽</span>
+      <div>
+        <span style="color:#94a3b8;font-size:0.85rem;display:block;">Petrol</span>
+        <span style="color:#f97316;font-size:1.35rem;font-weight:700;">
+          {% if prices and prices.get('Petrol') %}{{ prices['Petrol']|currency }}{% else %}—{% endif %}/L
+        </span>
+      </div>
+    </div>
+    <div style="width:1px;height:2rem;background:#334155;"></div>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <span style="font-size:1.5rem;">🛢️</span>
+      <div>
+        <span style="color:#94a3b8;font-size:0.85rem;display:block;">Diesel</span>
+        <span style="color:#f97316;font-size:1.35rem;font-weight:700;">
+          {% if prices and prices.get('Diesel') %}{{ prices['Diesel']|currency }}{% else %}—{% endif %}/L
+        </span>
+      </div>
+    </div>
+    <div style="width:1px;height:2rem;background:#334155;"></div>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <span style="font-size:1.1rem;color:#22c55e;">●</span>
+      <span style="color:#cbd5e1;font-size:0.9rem;font-weight:500;">Live Prices — Updated Daily</span>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Petrol Buddy -->
+<section style="padding:4rem 2rem;max-width:1100px;margin:0 auto;">
+  <h2 style="text-align:center;color:#ffffff;font-size:2rem;margin-bottom:0.5rem;">Why Choose Petrol Buddy?</h2>
+  <p style="text-align:center;color:#94a3b8;margin-bottom:2.5rem;max-width:600px;margin-left:auto;margin-right:auto;">We combine technology with convenience to bring fuel right where you need it.</p>
+  <div class="features-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;">
+    <div class="feature-box">
+      <div class="feature-icon-box">📍</div>
+      <h3 class="feature-title">Location Refill</h3>
+      <p class="feature-text">Get fuel delivered to your exact GPS location — home, office, or roadside. No more detours to petrol stations.</p>
+    </div>
+    <div class="feature-box">
+      <div class="feature-icon-box">✅</div>
+      <h3 class="feature-title">Certified Quality</h3>
+      <p class="feature-text">We source fuel only from authorized depots. Every delivery meets strict safety and purity standards.</p>
+    </div>
+    <div class="feature-box">
+      <div class="feature-icon-box">📡</div>
+      <h3 class="feature-title">Live Tracking</h3>
+      <p class="feature-text">Track your delivery partner in real time from dispatch to doorstep. Know exactly when your fuel arrives.</p>
+    </div>
+    <div class="feature-box">
+      <div class="feature-icon-box">💳</div>
+      <h3 class="feature-title">Flexible Payments</h3>
+      <p class="feature-text">Pay your way — UPI, cards, net banking, or cash on delivery. Transparent pricing with no hidden fees.</p>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section style="padding:4rem 2rem;background:#1e293b;">
+  <div style="max-width:1100px;margin:0 auto;">
+    <h2 style="text-align:center;color:#ffffff;font-size:2rem;margin-bottom:0.5rem;">How It Works</h2>
+    <p style="text-align:center;color:#94a3b8;margin-bottom:3rem;">Four simple steps to fuel at your doorstep.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;text-align:center;">
+      <div>
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1rem;">1</div>
+        <h4 style="color:#ffffff;margin-bottom:0.5rem;">Select Fuel</h4>
+        <p style="color:#94a3b8;font-size:0.9rem;">Choose between Petrol or Diesel and specify the quantity you need.</p>
+      </div>
+      <div>
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1rem;">2</div>
+        <h4 style="color:#ffffff;margin-bottom:0.5rem;">Set Location</h4>
+        <p style="color:#94a3b8;font-size:0.9rem;">Enter your delivery address or share your live GPS location.</p>
+      </div>
+      <div>
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1rem;">3</div>
+        <h4 style="color:#ffffff;margin-bottom:0.5rem;">Dispatch</h4>
+        <p style="color:#94a3b8;font-size:0.9rem;">A verified delivery partner is assigned and dispatched to your location.</p>
+      </div>
+      <div>
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1rem;">4</div>
+        <h4 style="color:#ffffff;margin-bottom:0.5rem;">Pay &amp; Receive</h4>
+        <p style="color:#94a3b8;font-size:0.9rem;">Make a secure payment and receive certified fuel — hassle-free.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Customer Feedback -->
+<section style="padding:4rem 2rem;max-width:1100px;margin:0 auto;">
+  <h2 style="text-align:center;color:#ffffff;font-size:2rem;margin-bottom:0.5rem;">What Our Customers Say</h2>
+  <p style="text-align:center;color:#94a3b8;margin-bottom:2.5rem;">Real feedback from real users across the country.</p>
+  {% if feedback_list %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
+    {% for fb in feedback_list %}
+    <div class="card" style="position:relative;">
+      <div style="font-size:2rem;color:#f97316;position:absolute;top:1rem;right:1.25rem;opacity:0.3;">❝</div>
+      <div style="margin-bottom:0.75rem;color:#f97316;">{{ fb.rating|stars }}</div>
+      <p style="color:#cbd5e1;font-style:italic;margin-bottom:1rem;line-height:1.6;">"{{ fb.message }}"</p>
+      <div style="display:flex;align-items:center;gap:0.75rem;border-top:1px solid #334155;padding-top:0.75rem;">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ea580c);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;">{{ fb.full_name[0]|upper }}</div>
+        <div>
+          <div style="color:#ffffff;font-weight:600;font-size:0.95rem;">{{ fb.full_name }}</div>
+          <div style="color:#94a3b8;font-size:0.8rem;">{{ fb.city }} · {{ fb.fuel_type }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="text-align:center;color:#64748b;">No feedback available yet. Be the first to share your experience!</p>
+  {% endif %}
+</section>
+
+<!-- CTA Section -->
+<section style="padding:4rem 2rem;background:linear-gradient(135deg,#f97316,#ea580c);text-align:center;">
+  <h2 style="color:#ffffff;font-size:2rem;margin-bottom:0.75rem;">Ready for Doorstep Refueling?</h2>
+  <p style="color:rgba(255,255,255,0.9);margin-bottom:1.5rem;max-width:500px;margin-left:auto;margin-right:auto;">Join thousands of happy customers who never visit a petrol station anymore. Sign up in under a minute.</p>
+  <a href="{{ url_for('auth.register') }}" class="btn btn-lg" style="background:#0f172a;color:#ffffff;padding:0.85rem 2.5rem;font-weight:600;">Create Your Free Account</a>
+</section>
+{% endblock %}

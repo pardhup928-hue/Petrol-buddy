@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Delivery Partner Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Delivery Partners Fleet</h1>
+        <p class="page-subtitle">Recruit mobile Bowser operators, set availability, and manage fleet vehicles</p>
+    </div>
+</div>
+
+{% if errors %}
+<div class="alert alert-danger">
+    <ul>
+        {% for err in errors %}
+            <li>{{ err }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- Add New Partner Card -->
+<div class="card" style="margin-bottom:1.75rem;">
+    <h2 class="card-title">Add New Delivery Partner</h2>
+    <form action="{{ url_for('admin.manage_delivery_partners') }}" method="POST">
+        <input type="hidden" name="action" value="add">
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="full_name">Partner Full Name *</label>
+                <input type="text" id="full_name" name="full_name" class="form-control" placeholder="e.g. Ramesh Babu" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="email">Portal Login Email *</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="e.g. ramesh@petrolbuddy.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="phone">Contact Mobile *</label>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="10-digit number" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="vehicle_number">Bowser Vehicle Reg No *</label>
+                <input type="text" id="vehicle_number" name="vehicle_number" class="form-control" placeholder="e.g. TS 09 EA 4521" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Initial Password *</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 6 characters" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="address">Base Hub / Address *</label>
+                <input type="text" id="address" name="address" class="form-control" placeholder="Hub depot location" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            + Register Delivery Partner
+        </button>
+    </form>
+</div>
+
+<!-- Partners Table -->
+<div class="card">
+    <h2 class="card-title">Active Fleet Partners</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Partner Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Vehicle No</th>
+                    <th>Available</th>
+                    <th>Account Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if partners %}
+                    {% for p in partners %}
+                    <tr>
+                        <td style="font-weight:600; color:var(--navy-dark);">{{ p.full_name }}</td>
+                        <td>{{ p.email }}</td>
+                        <td>{{ p.phone }}</td>
+                        <td><span style="font-family:monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px;">{{ p.vehicle_number }}</span></td>
+                        <td>
+                            {% if p.is_available %}
+                                <span class="badge badge-delivered">Available</span>
+                            {% else %}
+                                <span class="badge badge-cancelled">Unavailable</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.status == 'active' %}
+                                <span class="badge badge-active">Active</span>
+                            {% else %}
+                                <span class="badge badge-inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:6px;">
+                                <form action="{{ url_for('admin.manage_delivery_partners') }}" method="POST" style="display:inline;">
+                                    <input type="hidden" name="partner_id" value="{{ p.id }}">
+                                    <input type="hidden" name="action" value="toggle_availability">
+                                    <button type="submit" class="btn btn-outline btn-sm">Toggle Duty</button>
+                                </form>
+                                <form action="{{ url_for('admin.manage_delivery_partners') }}" method="POST" style="display:inline;">
+                                    <input type="hidden" name="user_id" value="{{ p.user_id }}">
+                                    {% if p.status == 'active' %}
+                                        <input type="hidden" name="action" value="deactivate">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Deactivate partner access?')">Deactivate</button>
+                                    {% else %}
+                                        <input type="hidden" name="action" value="activate">
+                                        <button type="submit" class="btn btn-success btn-sm">Activate</button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                            No delivery partners registered yet.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Customer Feedback{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Customer Feedback & Reviews</h1>
+        <p class="page-subtitle">Ratings submitted by verified customers following completed doorstep deliveries</p>
+    </div>
+    <div style="background:white; border:1px solid var(--border-color); padding:8px 18px; border-radius:var(--radius-sm); display:flex; align-items:center; gap:8px;">
+        <span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Overall Rating:</span>
+        <span style="font-size:1.35rem; font-weight:800; color:#f59e0b;">★ {{ avg_rating }}</span>
+        <span style="font-size:0.85rem; color:var(--text-muted);">/ 5.0</span>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Order Code</th>
+                    <th>Fuel</th>
+                    <th>Rating</th>
+                    <th>Review Message</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if feedback_list %}
+                    {% for fb in feedback_list %}
+                    <tr>
+                        <td style="font-weight:600; color:var(--navy-dark);">{{ fb.customer_name }}</td>
+                        <td><span style="font-weight:700; color:var(--primary);">{{ fb.order_code }}</span></td>
+                        <td><span class="badge {% if fb.fuel_type=='Petrol' %}badge-placed{% else %}badge-confirmed{% endif %}">{{ fb.fuel_type }}</span></td>
+                        <td style="color:#f59e0b; font-size:1.1rem; white-space:nowrap;">
+                            {{ fb.rating | stars }}
+                        </td>
+                        <td style="max-width:320px; line-height:1.5;">{{ fb.message }}</td>
+                        <td>{{ fb.created_at | fmt_datetime }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                            No feedback submissions recorded yet.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

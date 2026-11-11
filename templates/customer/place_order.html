@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Order Fuel{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Place Fuel Order</h1>
+        <p class="page-subtitle">Choose your fuel, quantity, and delivery details</p>
+    </div>
+</div>
+
+{% if errors %}
+<div class="alert alert-danger">
+    <i class="fas fa-exclamation-circle"></i>&nbsp;
+    <ul style="margin: 0; padding-left: 1.2rem;">
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form method="POST" action="{{ url_for('customer.place_order') }}" id="orderForm">
+    <div class="grid-cols-2">
+        <!-- Card 1: Fuel Selection -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-gas-pump"></i>&nbsp; Fuel Selection</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="fuel_type">Fuel Type</label>
+                <select class="form-control" id="fuel_type" name="fuel_type" required>
+                    <option value="">-- Select Fuel Type --</option>
+                    {% for fuel, info in fuel_catalog.items() %}
+                    <option value="{{ fuel }}"
+                            data-price="{{ info.price_per_litre }}"
+                            data-stock="{{ info.available_litres }}"
+                            {% if form and form.get('fuel_type') == fuel %}selected{% endif %}>
+                        {{ fuel }} — {{ info.price_per_litre | currency }}/L
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="quantity_litres">Quantity (Litres)</label>
+                <input type="number" class="form-control" id="quantity_litres" name="quantity_litres"
+                       min="5" max="100" step="1"
+                       value="{{ form.get('quantity_litres', '') if form else '' }}"
+                       placeholder="Min 5 — Max 100" required>
+                <span class="form-help">Minimum 5 litres, maximum 100 litres per order</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Unit Price</label>
+                <div style="font-size: 1.15rem; font-weight: 600; color: #f97316;">
+                    <span id="unit_price_display">Select a fuel type</span>
+                </div>
+            </div>
+
+            <div id="stock_notice" class="form-help" style="display: none; color: #f59e0b; font-weight: 500;">
+                <i class="fas fa-info-circle"></i>&nbsp; <span id="stock_text"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="payment_method">Payment Method</label>
+                <select class="form-control" id="payment_method" name="payment_method" required>
+                    <option value="Cash on Delivery" {% if form and form.get('payment_method') == 'Cash on Delivery' %}selected{% endif %}>Cash on Delivery</option>
+                    <option value="Online Payment" {% if form and form.get('payment_method') == 'Online Payment' %}selected{% endif %}>Online Payment - Demo</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Card 2: Delivery Schedule -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-calendar-alt"></i>&nbsp; Delivery Schedule</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="preferred_date">Preferred Date</label>
+                <input type="date" class="form-control" id="preferred_date" name="preferred_date"
+                       value="{{ form.get('preferred_date', '') if form else '' }}">
+                <span class="form-help">Leave blank for earliest available delivery</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="preferred_time">Preferred Time</label>
+                <input type="time" class="form-control" id="preferred_time" name="preferred_time"
+                       value="{{ form.get('preferred_time', '') if form else '' }}">
+                <span class="form-help">Delivery hours: 6:00 AM – 9:00 PM</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Delivery Location -->
+    <div class="card" style="margin-top: 1.5rem;">
+        <h2 class="card-title"><i class="fas fa-map-marker-alt"></i>&nbsp; Delivery Location</h2>
+
+        <div class="form-group">
+            <label class="form-label" for="delivery_address">Delivery Address</label>
+            <textarea class="form-control" id="delivery_address" name="delivery_address" rows="3"
+                      placeholder="Enter your full delivery address" required>{{ form.get('delivery_address', '') if form else '' }}</textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="city">City</label>
+                <input type="text" class="form-control" id="city" name="city"
+                       value="{{ form.get('city', current_user.city or '') if form else current_user.city or '' }}"
+                       placeholder="City" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="pincode">Pincode</label>
+                <input type="text" class="form-control" id="pincode" name="pincode"
+                       value="{{ form.get('pincode', current_user.pincode or '') if form else current_user.pincode or '' }}"
+                       placeholder="6-digit pincode" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="landmark">Landmark</label>
+            <input type="text" class="form-control" id="landmark" name="landmark"
+                   value="{{ form.get('landmark', '') if form else '' }}"
+                   placeholder="Near any landmark? (optional)">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="location_description">Location Description</label>
+            <input type="text" class="form-control" id="location_description" name="location_description"
+                   value="{{ form.get('location_description', '') if form else '' }}"
+                   placeholder="Any extra directions to find you (optional)">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">GPS Location (Optional)</label>
+            <button type="button" class="btn btn-outline btn-sm" id="detectLocationBtn">
+                <i class="fas fa-crosshairs"></i>&nbsp; Detect My Location
+            </button>
+            <div id="locationStatus" style="margin-top: 0.5rem; font-size: 0.85rem; color: #94a3b8;"></div>
+            <div class="form-row" style="margin-top: 0.75rem;">
+                <div class="form-group">
+                    <label class="form-label" for="latitude">Latitude</label>
+                    <input type="text" class="form-control" id="latitude" name="latitude"
+                           value="{{ form.get('latitude', '') if form else '' }}" readonly
+                           placeholder="Auto-detected">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="longitude">Longitude</label>
+                    <input type="text" class="form-control" id="longitude" name="longitude"
+                           value="{{ form.get('longitude', '') if form else '' }}" readonly
+                           placeholder="Auto-detected">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Additional Instructions & Total -->
+    <div class="card" style="margin-top: 1.5rem;">
+        <h2 class="card-title"><i class="fas fa-sticky-note"></i>&nbsp; Additional Instructions</h2>
+
+        <div class="form-group">
+            <textarea class="form-control" id="instructions" name="instructions" rows="3"
+                      placeholder="Any special instructions for the delivery partner? (optional)">{{ form.get('instructions', '') if form else '' }}</textarea>
+        </div>
+
+        <div style="background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.25); border-radius: 12px; padding: 1.5rem; text-align: center; margin-top: 1rem;">
+            <span style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Order Total</span>
+            <div id="total_amount_display" style="font-size: 2.2rem; font-weight: 700; color: #f97316; margin-top: 0.25rem;">
+                ₹0.00
+            </div>
+        </div>
+
+        <input type="hidden" id="total_amount" name="total_amount" value="0">
+        <input type="hidden" id="price_per_litre" name="price_per_litre" value="0">
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-check-circle"></i>&nbsp; Confirm Order
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fuelSelect = document.getElementById('fuel_type');
+    const qtyInput = document.getElementById('quantity_litres');
+    const unitPriceDisplay = document.getElementById('unit_price_display');
+    const stockNotice = document.getElementById('stock_notice');
+    const stockText = document.getElementById('stock_text');
+    const totalDisplay = document.getElementById('total_amount_display');
+    const totalHidden = document.getElementById('total_amount');
+    const priceHidden = document.getElementById('price_per_litre');
+
+    function updateCalculations() {
+        const selected = fuelSelect.options[fuelSelect.selectedIndex];
+        if (!selected || !selected.value) {
+            unitPriceDisplay.textContent = 'Select a fuel type';
+            totalDisplay.textContent = '₹0.00';
+            totalHidden.value = '0';
+            priceHidden.value = '0';
+            stockNotice.style.display = 'none';
+            return;
+        }
+
+        const price = parseFloat(selected.dataset.price);
+        const stock = parseFloat(selected.dataset.stock);
+        const qty = parseFloat(qtyInput.value) || 0;
+
+        priceHidden.value = price.toFixed(2);
+        unitPriceDisplay.textContent = '₹' + price.toFixed(2) + ' per litre';
+
+        if (stock > 0) {
+            stockNotice.style.display = 'block';
+            stockText.textContent = 'Available stock: ' + stock + ' litres';
+            if (qty > stock) {
+                stockText.textContent = 'Only ' + stock + ' litres available! Please reduce quantity.';
+                stockNotice.style.color = '#ef4444';
+            } else {
+                stockNotice.style.color = '#f59e0b';
+            }
+        } else {
+            stockNotice.style.display = 'none';
+        }
+
+        const total = price * qty;
+        totalDisplay.textContent = '₹' + total.toFixed(2);
+        totalHidden.value = total.toFixed(2);
+    }
+
+    fuelSelect.addEventListener('change', updateCalculations);
+    qtyInput.addEventListener('input', updateCalculations);
+
+    // GPS Detection
+    const detectBtn = document.getElementById('detectLocationBtn');
+    const locationStatus = document.getElementById('locationStatus');
+    const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+
+    detectBtn.addEventListener('click', function() {
+        if (!navigator.geolocation) {
+            locationStatus.textContent = 'Geolocation is not supported by your browser.';
+            locationStatus.style.color = '#ef4444';
+            return;
+        }
+
+        locationStatus.textContent = 'Detecting location...';
+        locationStatus.style.color = '#3b82f6';
+        detectBtn.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                latInput.value = position.coords.latitude.toFixed(6);
+                lngInput.value = position.coords.longitude.toFixed(6);
+                locationStatus.textContent = 'Location detected successfully!';
+                locationStatus.style.color = '#22c55e';
+                detectBtn.disabled = false;
+            },
+            function(error) {
+                locationStatus.textContent = 'Unable to detect location: ' + error.message;
+                locationStatus.style.color = '#ef4444';
+                detectBtn.disabled = false;
+            }
+        );
+    });
+
+    // Initialize on load if fuel is pre-selected
+    if (fuelSelect.value) {
+        updateCalculations();
+    }
+});
+</script>
+{% endblock %}
